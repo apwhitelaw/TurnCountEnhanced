@@ -6,8 +6,12 @@ import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 
+import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Main extends Application {
 
@@ -67,6 +71,15 @@ public class Main extends Application {
                 updateTitle();
             }
         });
+
+        FileHandler fileHandler = new FileHandler();
+        Reader reader = Files.newBufferedReader(Paths.get(ClassLoader.getSystemResource("test.csv").toURI()));
+        List<String[]> list = fileHandler.readAll(reader);
+        for(String[] strings: list) {
+            for(String s : strings) {
+                System.out.println(s);
+            }
+        }
 
     }
 

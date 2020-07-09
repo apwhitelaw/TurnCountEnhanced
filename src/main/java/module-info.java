@@ -1,6 +1,6 @@
 module turncountenhanced {
-    requires javafx.fxml;
     requires javafx.controls;
+    requires opencsv;
 
     opens turncount;
 }
