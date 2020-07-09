@@ -46,7 +46,11 @@ public class Interval {
 
     public Interval(int hour, int minute) {
         startTime = LocalTime.of(hour, minute);
-        endTime = startTime.plusMinutes(5);
+        if(startTime.getMinute() == 55) {
+            endTime = startTime.plusHours(1).minusMinutes(55);
+        } else {
+            endTime = startTime.plusMinutes(5);
+        }
 
     }
 
@@ -64,10 +68,6 @@ public class Interval {
 
     public void setDataValue(int bank, int index, int value) {
         this.data[bank][index] = value;
-    }
-
-    public void test() {
-
     }
 
 }

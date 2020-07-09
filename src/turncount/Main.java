@@ -6,18 +6,25 @@ import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 
 public class Main extends Application {
 
-    ArrayList<Interval> intervalData = new ArrayList<>();
+    Stage mainStage;
     Layout layout = new Layout();
     public Interval currentInterval;
+    ArrayList<Interval> intervalData = new ArrayList<>();
     public SimpleIntegerProperty currentBank = new SimpleIntegerProperty(0);
     SimpleIntegerProperty[][] propertyData = new SimpleIntegerProperty[5][16];
 
+    String username = "";
+    String siteCode = "";
+    String startTime = "";
+
     @Override
     public void start(final Stage primaryStage) throws Exception {
+        mainStage = primaryStage;
 
         for(int i = 0; i < 5; i++) {
             for(int j = 0; j < 16; j++) {
@@ -25,15 +32,9 @@ public class Main extends Application {
             }
         }
 
-        currentInterval = new Interval(11,30);
-        intervalData.add(currentInterval);
-        currentInterval.test();
-
         layout.createSceneAndSetupStage(primaryStage);
         setupKeyHandler(layout.mainScene);
         layout.setLabelBinds(propertyData);
-
-        System.out.println(currentInterval.startTime);
 
         // Setup button actions
         layout.nextIntervalButton.setOnAction(actionEvent -> {
@@ -48,8 +49,25 @@ public class Main extends Application {
             deleteInterval();
         });
         layout.goToIntervalButton.setOnAction(actionEvent -> {
-
+            //popup.setupPopup(primaryStage);
         });
+
+        SetupPopup popup = new SetupPopup();
+        popup.setupPopup(primaryStage);
+        popup.startButton.setOnAction(actionEvent -> {
+            if(!popup.usernameField.getText().isBlank() && !popup.siteCodeField.getText().isBlank() && !popup.startTimeField.getText().isBlank()) {
+                popup.stage.close();
+                username = popup.usernameField.getText();
+                siteCode = popup.siteCodeField.getText();
+                startTime = popup.startTimeField.getText();
+
+                LocalTime time = LocalTime.parse(startTime);
+                currentInterval = new Interval(time.getHour(), time.getMinute());
+                intervalData.add(currentInterval);
+                updateTitle();
+            }
+        });
+
     }
 
     // Next interval, new or existing (chronologically)
@@ -74,6 +92,7 @@ public class Main extends Application {
         }
         updatePropertyIntegers();
         changeBank(0);
+        updateTitle();
     }
 
     // Go back one interval (chronologically) if one exists
@@ -85,9 +104,10 @@ public class Main extends Application {
         }
         updatePropertyIntegers();
         changeBank(0);
+        updateTitle();
     }
 
-    // Updates all SimplePropertyInteger 's to values in currentInterval
+    // Updates all SimplePropertyInteger 's to values of currentInterval
     // Used for interval change
     public void updatePropertyIntegers() {
         for(int i = 0; i < 5; i++) {
@@ -151,6 +171,10 @@ public class Main extends Application {
                 case COMMA: changeBank(4); break;
             }
         });
+    }
+
+    public void updateTitle() {
+        mainStage.setTitle(String.format("TurnCountEnhanced - (%s - %s)", currentInterval.startTime.toString(),currentInterval.endTime.toString()));
     }
 
     public static void main(String[] args) {
