@@ -4,10 +4,12 @@ import javafx.application.Application;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.Reader;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -18,9 +20,10 @@ public class Main extends Application {
     Stage mainStage;
     Layout layout = new Layout();
     public Interval currentInterval;
-    ArrayList<Interval> intervalData = new ArrayList<>();
+    ArrayList<Interval> countData = new ArrayList<>();
     public SimpleIntegerProperty currentBank = new SimpleIntegerProperty(0);
     SimpleIntegerProperty[][] propertyData = new SimpleIntegerProperty[5][16];
+    FileHandler fileHandler = new  FileHandler();
 
     String username = "";
     String siteCode = "";
@@ -53,44 +56,61 @@ public class Main extends Application {
             deleteInterval();
         });
         layout.goToIntervalButton.setOnAction(actionEvent -> {
-            //popup.setupPopup(primaryStage);
+//            List<String[]> s = fileHandler.buildStrings(username, siteCode, countData);
+            Path path = Path.of("src\\main\\resources\\count.csv");
+//            try {
+//                fileHandler.writeInts(s, path);
+//            } catch(Exception e) {
+//                System.err.println(e);
+//            }
+            saveData(path);
         });
 
         SetupPopup popup = new SetupPopup();
         popup.setupPopup(primaryStage);
         popup.startButton.setOnAction(actionEvent -> {
-            if(!popup.usernameField.getText().isBlank() && !popup.siteCodeField.getText().isBlank() && !popup.startTimeField.getText().isBlank()) {
-                popup.stage.close();
+            if(!popup.usernameField.getText().isBlank() &&
+                    !popup.siteCodeField.getText().isBlank() &&
+                    !popup.startTimeField.getText().isBlank()) {
                 username = popup.usernameField.getText();
                 siteCode = popup.siteCodeField.getText();
                 startTime = popup.startTimeField.getText();
 
                 LocalTime time = LocalTime.parse(startTime);
-                currentInterval = new Interval(time.getHour(), time.getMinute());
-                intervalData.add(currentInterval);
-                updateTitle();
+                if(time != null) {
+                    popup.stage.close();
+                    currentInterval = new Interval(time.getHour(), time.getMinute());
+                    countData.add(currentInterval);
+                    updateTitle();
+                }
             }
         });
 
-        FileHandler fileHandler = new FileHandler();
-        Reader reader = Files.newBufferedReader(Paths.get(ClassLoader.getSystemResource("test.csv").toURI()));
-        List<String[]> list = fileHandler.readAll(reader);
-        for(String[] strings: list) {
-            for(String s : strings) {
-                System.out.println(s);
+        popup.openFileButton.setOnAction(actionEvent -> {
+            FileHandler fileHandler = new FileHandler();
+            try {
+                List<String[]> fileData = fileHandler.readEntireFile("\\main\\resources\\count.csv");
+                for(String[] line : fileData) {
+                    for(String s : line) {
+                        System.out.print(s + ",");
+                    }
+                    System.out.println();
+                }
+            } catch (Exception e) {
+                System.err.println(e);
             }
-        }
+        });
 
     }
 
     // Next interval, new or existing (chronologically)
     public void incrementInterval() {
-        int index = intervalData.indexOf(currentInterval);
+        int index = countData.indexOf(currentInterval);
 
         // if not last index, get interval from arraylist
         // else create new interval and add it to arraylist
-        if(index < (intervalData.size() - 1)) {
-            currentInterval = intervalData.get(index + 1);
+        if(index < (countData.size() - 1)) {
+            currentInterval = countData.get(index + 1);
         } else {
             int hour = currentInterval.startTime.getHour();
             int minute = currentInterval.startTime.getMinute();
@@ -101,7 +121,7 @@ public class Main extends Application {
                 minute += 5;
             }
             currentInterval = new Interval(hour, minute);
-            intervalData.add(currentInterval);
+            countData.add(currentInterval);
         }
         updatePropertyIntegers();
         changeBank(0);
@@ -110,10 +130,10 @@ public class Main extends Application {
 
     // Go back one interval (chronologically) if one exists
     public void decrementInterval() {
-        int index = intervalData.indexOf(currentInterval);
-        System.out.println(intervalData.size());
+        int index = countData.indexOf(currentInterval);
+        System.out.println(countData.size());
         if(index > 0) {
-            currentInterval = intervalData.get(index - 1);
+            currentInterval = countData.get(index - 1);
         }
         updatePropertyIntegers();
         changeBank(0);
@@ -153,10 +173,13 @@ public class Main extends Application {
         layout.tabPane.getSelectionModel().select(currentBank.intValue());
     }
 
-    public void saveData() {
-        // intervals now added to array upon creation
-
-        // TODO: WRITE TO FILE (CSV)
+    public void saveData(Path path) {
+        List<String[]> countStrings = fileHandler.buildStrings(username, siteCode, countData);
+        try {
+            fileHandler.saveFile(countStrings, path);
+        } catch(Exception e) {
+            System.err.println(e);
+        }
     }
 
     public void setupKeyHandler(Scene scene) {

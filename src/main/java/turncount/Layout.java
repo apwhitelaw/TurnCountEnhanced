@@ -23,7 +23,7 @@ public class Layout {
     Button nextIntervalButton = new Button("Next Interval");
     Button prevIntervalButton = new Button("Previous Interval");
     Button delIntervalButton = new Button("Delete Interval");
-    Button goToIntervalButton = new Button("Go to Interval");
+    Button goToIntervalButton = new Button("Save Data");
 
     public void createSceneAndSetupStage(Stage primaryStage) {
 
@@ -85,18 +85,11 @@ public class Layout {
     }
 
     private TabPane setupBanksTabPane() {
-        Tab tab0 = new Tab("Bank 0", new Label("Contains data for Bank 0"));
-        tab0.setContent(setupCountGridPane("0"));
-        Tab tab1 = new Tab("Bank 1", new Label("Contains data for Bank 1"));
-        tab1.setContent(setupCountGridPane("1"));
-        Tab tab2 = new Tab("Bank 2", new Label("Contains data for Bank 2"));
-        tab2.setContent(setupCountGridPane("2"));
-        Tab tab3 = new Tab("Bank 3", new Label("Contains data for Bank 3"));
-        tab3.setContent(setupCountGridPane("3"));
-        Tab tab4 = new Tab("Bank 4", new Label("Contains data for Bank 4"));
-        tab4.setContent(setupCountGridPane("4"));
-        tabPane.getTabs().addAll(tab0, tab1, tab2, tab3, tab4);
-
+        for(int i = 0; i < 5; i++) {
+            Tab t = new Tab(String.format("Bank %d", i), new Label(String.format("Contains data for Bank %d", i)));
+            t.setContent(setupCountGridPane(String.format("%s", i)));
+            tabPane.getTabs().add(t);
+        }
         return tabPane;
     }
 
