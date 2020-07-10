@@ -76,6 +76,8 @@ public class Main extends Application {
                 siteCode = popup.siteCodeField.getText();
                 startTime = popup.startTimeField.getText();
 
+                // CHECK IF COUNT FILE ALREADY EXISTS?
+
                 LocalTime time = LocalTime.parse(startTime);
                 if(time != null) {
                     popup.stage.close();
