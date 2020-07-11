@@ -2,7 +2,9 @@ package turncount;
 
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
+import javafx.scene.control.Alert;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.Reader;
 import java.nio.file.Files;
@@ -60,7 +62,7 @@ public class FileHandler {
         writer.writeAll(stringArray);
 
         writer.close();
-        System.out.println("saved");
+        System.out.println("Saved File");
         return true;
     }
 
@@ -95,6 +97,11 @@ public class FileHandler {
         System.out.println(pathString);
         Reader reader = Files.newBufferedReader(Paths.get(
                 ClassLoader.getSystemResource(pathString).toURI()));
+        return readAll(reader);
+    }
+
+    public List<String[]> readEntireFile(File file) throws Exception {
+        Reader reader = Files.newBufferedReader(file.toPath());
         return readAll(reader);
     }
 

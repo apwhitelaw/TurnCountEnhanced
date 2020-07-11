@@ -1,32 +1,28 @@
 package turncount;
 
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
-import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 public class SetupPopup {
 
-    Stage stage = new Stage();
-    Scene launchScene;
-    Scene newCountScene;
-    TextField usernameField;
-    TextField siteCodeField;
-    TextField startTimeField;
-    Button cancelButton = new Button("Cancel");
-    Button startButton = new Button("Start");
-    Button newButton = new Button("New");
-    Button openFileButton = new Button("Open");
-    Button quitButton = new Button("Quit");
+    private Stage stage = new Stage();
+    private Scene launchScene;
+    private Scene newCountScene;
+    private TextField usernameField;
+    private TextField siteCodeField;
+    private TextField startTimeField;
+    private Button cancelButton = new Button("Cancel");
+    private Button startButton = new Button("Start");
+    private Button newButton = new Button("New");
+    private Button openFileButton = new Button("Open");
+    private Button quitButton = new Button("Quit");
 
     public void setupPopup(Stage primaryStage) {
 
@@ -79,9 +75,12 @@ public class SetupPopup {
         Label usernameLabel = new Label("Username: ");
         Label siteCodeLabel = new Label("Site Code: ");
         Label startTimeLabel = new Label("Start Time: ");
-        usernameField = new TextField();
-        siteCodeField = new TextField();
-        startTimeField = new TextField("HH:mm");
+//        usernameField = new TextField();
+//        siteCodeField = new TextField();
+//        startTimeField = new TextField("HH:mm");
+        usernameField = new TextField("jack");
+        siteCodeField = new TextField("14899436 jack");
+        startTimeField = new TextField("10:00");
         cancelButton.setOnAction(actionEvent -> {
             setScene(launchScene);
         });
@@ -101,12 +100,47 @@ public class SetupPopup {
         return new Scene(gridPane, 300, 200);
     }
 
-    public void setScene(Scene scene) {
-        stage.setScene(scene);
-    }
-
     public void openCount() {
 
     }
 
+    public void setScene(Scene scene) {
+        stage.setScene(scene);
+    }
+
+    public Stage getStage() {
+        return stage;
+    }
+
+    public TextField getUsernameField() {
+        return usernameField;
+    }
+
+    public TextField getSiteCodeField() {
+        return siteCodeField;
+    }
+
+    public TextField getStartTimeField() {
+        return startTimeField;
+    }
+
+    public Button getCancelButton() {
+        return cancelButton;
+    }
+
+    public Button getStartButton() {
+        return startButton;
+    }
+
+    public Button getNewButton() {
+        return newButton;
+    }
+
+    public Button getOpenFileButton() {
+        return openFileButton;
+    }
+
+    public Button getQuitButton() {
+        return quitButton;
+    }
 }
