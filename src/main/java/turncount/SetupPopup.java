@@ -1,11 +1,14 @@
 package turncount;
 
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -53,14 +56,18 @@ public class SetupPopup {
         gridPane.setAlignment(Pos.CENTER);
         gridPane.setHgap(10);
         gridPane.setVgap(20);
-        Label welcomeLabel = new Label("Welcome!");
+        //Label welcomeLabel = new Label("Welcome!");
+        Text welcomeText = new Text("Welcome!");
         HBox title = new HBox();
         title.setAlignment(Pos.CENTER);
-        title.getChildren().add(welcomeLabel);
+        title.getChildren().add(welcomeText);
         gridPane.add(title, 0, 0, 3, 1);
         gridPane.add(newButton,0, 1);
         gridPane.add(openFileButton,1, 1);
         gridPane.add(quitButton,2, 1);
+
+        //gridPane.setBackground(new Background(new BackgroundFill(Color.RED, CornerRadii.EMPTY, Insets.EMPTY)));
+        //gridPane.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
 
         return new Scene(gridPane, 300, 100);
     }
@@ -78,8 +85,8 @@ public class SetupPopup {
 //        usernameField = new TextField();
 //        siteCodeField = new TextField();
 //        startTimeField = new TextField("HH:mm");
-        usernameField = new TextField("jack");
-        siteCodeField = new TextField("14899436 jack");
+        usernameField = new TextField("John");
+        siteCodeField = new TextField("15879424 SBEB");
         startTimeField = new TextField("10:00");
         cancelButton.setOnAction(actionEvent -> {
             setScene(launchScene);
@@ -96,6 +103,9 @@ public class SetupPopup {
         gridPane.add(startTimeLabel, 0, 2);
         gridPane.add(startTimeField, 1, 2, 2, 1);
         gridPane.add(controlBox, 0, 3, 3, 1);
+
+        //gridPane.setBackground(new Background(new BackgroundFill(Color.RED, CornerRadii.EMPTY, Insets.EMPTY)));
+        //gridPane.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
 
         return new Scene(gridPane, 300, 200);
     }

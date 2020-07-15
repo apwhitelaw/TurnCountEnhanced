@@ -6,7 +6,7 @@ public class Interval {
 
     LocalTime startTime;
     LocalTime endTime;
-    private int[][] data = new int[5][16];
+    private int[][] data;
 
     public enum Movement {
         SBR(0, "SB Right"),
@@ -44,22 +44,35 @@ public class Interval {
         }
     }
 
-    public Interval(int hour, int minute) {
-        startTime = LocalTime.of(hour, minute);
-        if(startTime.getMinute() == 55) {
-            endTime = startTime.plusHours(1).minusMinutes(55);
-        } else {
-            endTime = startTime.plusMinutes(5);
-        }
+    public Interval(LocalTime time, int[][] data) {
+        this(time);
+        this.data = data;
+    }
 
+    public Interval(int hour, int minute) {
+        this(LocalTime.of(hour, minute));
+    }
+
+    public Interval(LocalTime time) {
+        startTime = time;
+        data = new int[5][16];
+        endTime = startTime.plusMinutes(5);
     }
 
     public void increment(int bank, int index) {
         data[bank][index] += 1;;
     }
 
+    public LocalTime getStartTime() {
+        return startTime;
+    }
+
     public int[][] getData() {
         return data;
+    }
+
+    public void setData(int[][] data) {
+        this.data = data;
     }
 
     public int getDataValue(int bank, int index) {
