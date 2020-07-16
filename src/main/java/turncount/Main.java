@@ -2,6 +2,7 @@ package turncount;
 
 import javafx.application.Application;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -27,26 +28,31 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Main extends Application {
 
     final static String SITECODE_REGEX = "^[0-9]{8,}";
+    private final static DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
 
-    Stage countStage; // 'Stage countStage' and 'CountStage layout' is confusing, will fix later
+    CustomStage countStage;
     Stage videoStage;
     SetupPopup popup;
     CountStage countStageHandler;
     VideoStage videoStageHandler;
+
     public Interval currentInterval;
-    ArrayList<Interval> countData = new ArrayList<>();
-    public SimpleIntegerProperty currentBank = new SimpleIntegerProperty(0);
-    SimpleIntegerProperty[][] propertyData = new SimpleIntegerProperty[5][16];
-    FileHandler fileHandler = new  FileHandler();
-    boolean countStarted = false;
+    ArrayList<Interval> countData;
+    public SimpleIntegerProperty currentBank;
+    SimpleIntegerProperty[][] propertyData;
+    FileHandler fileHandler;
+    boolean countStarted;
+    long timerStart;
 
     private String username = "";
     private String siteCode = "";
@@ -54,70 +60,55 @@ public class Main extends Application {
 
     @Override
     public void start(final Stage primaryStage) throws Exception {
-        countStage = primaryStage;
+
+        initialSetup();
+    }
+
+    public void initialSetup() {
+
+        countData = new ArrayList<>();
+        currentBank = new SimpleIntegerProperty(0);
+        propertyData = new SimpleIntegerProperty[5][16];
+        fileHandler = new  FileHandler();
+        countStarted = false;
 
         for(int i = 0; i < 5; i++) {
             for(int j = 0; j < 16; j++) {
                 propertyData[i][j] = new SimpleIntegerProperty(0);
             }
         }
+        setupStages();
+        setupKeyHandler();
+        timerStart = System.nanoTime();
+    }
 
-        countStageHandler = new CountStage(countStage);
+    public void setupStages() {
+        setupCountStage();
+        setupPopup();
+        setupVideoStage();
+    }
 
-//        CustomStageBuilder builder = new CustomStageBuilder();
-//        builder = builder.setWindowTitle("New test window");
-//        builder = builder.setTitleColor("white");
-//        builder = builder.setWindowColor("blue");
-//        CustomStage customStage = builder.build();
-//        customStage.show();
+    public void setupCountStage() {
+        countStageHandler = new CountStage();
+        countStage = countStageHandler.getStage();
 
-        // Setup button actions
-        countStageHandler.nextIntervalButton.setOnAction(actionEvent -> {
-            incrementInterval();
-        });
-        countStageHandler.prevIntervalButton.setOnAction(actionEvent -> {
-            decrementInterval();
-        });
-        countStageHandler.delIntervalButton.setOnAction(actionEvent -> {
-            deleteInterval();
-        });
-        countStageHandler.goToIntervalButton.setOnAction(actionEvent -> {
-            goToInterval();
+        countStageHandler.nextIntervalButton.setOnAction(actionEvent -> incrementInterval());
+        countStageHandler.prevIntervalButton.setOnAction(actionEvent -> decrementInterval());
+        countStageHandler.delIntervalButton.setOnAction(actionEvent -> deleteInterval());
+        //countStageHandler.goToIntervalButton.setOnAction(actionEvent -> goToInterval());
+        countStageHandler.goToIntervalButton.setOnAction(actionEvent -> saveData(fileHandler.getDefaultDirectory()));
+        countStageHandler.setLabelBinds(propertyData);
+    }
 
-////            List<String[]> s = fileHandler.buildStrings(username, siteCode, countData);
-//            Path path = Path.of("src\\main\\resources\\count.csv");
-////            try {
-////                fileHandler.writeInts(s, path);
-////            } catch(Exception e) {
-////                System.err.println(e);
-////            }
-//            saveData(path);
-        });
+    public void setupPopup() {
 
-        popup = new SetupPopup();
-        popup.setupPopup(primaryStage);
+        popup = new SetupPopup(countStage);
         popup.getStartButton().setOnAction(actionEvent -> {
             if(!popup.getUsernameField().getText().isBlank() &&
                     !popup.getSiteCodeField().getText().isBlank() &&
-                    !popup.getStartTimeField().getText().isBlank()) {
-                username = popup.getUsernameField().getText();
-                siteCode = popup.getSiteCodeField().getText();
-                startTime = popup.getStartTimeField().getText();
-
-                if(siteCodeAlreadyExists(siteCode)) {
-                    sendAlert(Alert.AlertType.WARNING, "Site Code already exists!",
-                            "This site code already exists, are you sure you want to continue?", popup.getStage());
-                } else {
-                    LocalTime time = LocalTime.parse(startTime);
-                    if(time != null) {
-                        popup.getStage().close();
-                        currentInterval = new Interval(time.getHour(), time.getMinute());
-                        countData.add(currentInterval);
-                        updateTitle();
-                        countStarted = true;
-                    }
-                }
-
+                    !popup.getStartTimeField().getText().isBlank() &&
+                    LocalTime.parse("10:00", TIME_FORMAT) != null) {
+                setupNewCount();
             }
         });
 
@@ -127,13 +118,43 @@ public class Main extends Application {
             fileChooser.setTitle("Open Count File");
             loadData(fileChooser.showOpenDialog(popup.getStage()));
         });
+    }
 
+    public void setupVideoStage() {
         videoStageHandler = new VideoStage();
-        videoStageHandler.setupVideoStage();
         videoStage = videoStageHandler.getStage();
+    }
 
-        setupKeyHandler();
-        countStageHandler.setLabelBinds(propertyData);
+    public void setupNewCount() {
+        username = popup.getUsernameField().getText();
+        siteCode = popup.getSiteCodeField().getText();
+        startTime = popup.getStartTimeField().getText();
+
+        if(siteCodeAlreadyExists(siteCode)) {
+            sendAlert(Alert.AlertType.WARNING, "Site Code already exists!",
+                    "This site code already exists, are you sure you want to continue?", popup.getStage());
+        } else {
+            LocalTime time = LocalTime.parse(startTime, TIME_FORMAT);
+            if(time != null) {
+                popup.getStage().close();
+                countStage.setOpacity(1.0);
+                currentInterval = new Interval(time.getHour(), time.getMinute());
+                countData.add(currentInterval);
+                updateTitle();
+                countStarted = true;
+            }
+        }
+    }
+
+    public void unusedSaveFunction() {
+
+        List<String[]> s = fileHandler.buildCountStrings(username, siteCode, countData);
+        Path path = Path.of("src\\main\\resources\\count.csv");
+        try {
+            fileHandler.writeInts(s, path);
+        } catch(Exception e) {
+            System.err.println(e);
+        }
     }
 
     public boolean siteCodeAlreadyExists(String string) {
@@ -226,7 +247,19 @@ public class Main extends Application {
         Button goButton = new Button("Go");
         goButton.setMinWidth(33);
         HBox.setHgrow(goButton, Priority.NEVER);
-        goButton.setOnAction(actionEvent -> stage.close());
+        goButton.setOnAction(actionEvent -> {
+           String text = timeField.getText();
+           LocalTime time = LocalTime.parse(text);
+           for(Interval interval: countData) {
+               if(interval.getStartTime().equals(time)) {
+                   currentInterval = interval;
+                   updatePropertyIntegers();
+                   changeBank(0);
+                   updateTitle();
+               }
+           }
+           stage.close();
+        });
         Button cancelButton = new Button("Cancel");
         HBox hBox2 = new HBox(timeField, goButton);
         HBox.setHgrow(timeField, Priority.ALWAYS);
@@ -256,6 +289,7 @@ public class Main extends Application {
         }
     }
 
+    // Increment count
     public void increment(int index) {
         currentInterval.increment(currentBank.intValue(), index);
         propertyData[currentBank.intValue()][index].set(currentInterval.getDataValue(currentBank.intValue(), index));
@@ -268,17 +302,23 @@ public class Main extends Application {
         countStageHandler.tabPane.getSelectionModel().select(currentBank.intValue());
     }
 
-    public void saveData(Path path) {
-        List<String[]> countStrings = fileHandler.buildStrings(username, siteCode, countData);
+    // Saves (siteCode)_count.csv and (siteCode)_statistics.csv
+    public void saveData(String string) {
+        Path countPath = Path.of(string + "count.csv");
+        Path statsPath = Path.of(string + "stats.csv");
+
+        List<String[]> countStrings = fileHandler.buildCountStrings(username, siteCode, countData);
+        List<String[]> statsStrings = fileHandler.buildStatisticsStrings(username, siteCode, countData, timerStart);
+
         try {
-            fileHandler.saveFile(countStrings, path);
+            fileHandler.saveFile(countStrings, countPath);
+            fileHandler.saveFile(statsStrings, statsPath);
+
+            sendAlert(Alert.AlertType.INFORMATION, "Saved Successfully!",
+                    "Your count file has successfully been saved to the specified folder.", countStage);
         } catch(Exception e) {
             System.err.println(e);
         }
-
-        sendAlert(Alert.AlertType.INFORMATION, "Saved Successfully!",
-                "Your count file has successfully been saved to the specified folder.",
-                countStage);
     }
 
     public void loadData(File file) {
@@ -379,7 +419,8 @@ public class Main extends Application {
     }
 
     public void updateTitle() {
-        countStage.setTitle(String.format("TurnCountEnhanced - (%s - %s)", currentInterval.startTime.toString(),currentInterval.endTime.toString()));
+        //countStage.setTitle(String.format("TurnCountEnhanced - (%s - %s)", currentInterval.startTime.toString(),currentInterval.endTime.toString()));
+        countStage.setWindowTitle(String.format("TurnCountEnhanced - (%s - %s)", currentInterval.startTime.toString(),currentInterval.endTime.toString()));
     }
 
     public static void main(String[] args) {

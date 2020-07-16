@@ -10,13 +10,17 @@ import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FileHandler {
 
-    // strings to match formatting of csv files
-    public List<String[]> buildStrings(String username, String siteCode, ArrayList<Interval> countData) {
+    private static final String DEFAULT_DIRECTORY = "src\\main\\resources\\";
+
+    // strings to output to _count.csv
+    public List<String[]> buildCountStrings(String username, String siteCode, ArrayList<Interval> countData) {
         List<String[]> outputStrings = new ArrayList<>();
         outputStrings.add(new String[]{"Job number", siteCode});
         outputStrings.add(new String[]{"Employee ID", username, "Interval size", "5"});
@@ -49,6 +53,70 @@ public class FileHandler {
             }
         }
         return outputStrings;
+    }
+
+    public List<String[]> buildStatisticsStrings(String username, String siteCode, ArrayList<Interval> countData, long timerStart) {
+
+        List<String[]> outputStrings = new ArrayList<>();
+        outputStrings.add(new String[]{"Job number", siteCode});
+        outputStrings.add(new String[]{""});
+        outputStrings.add(new String[]{"Employee", username});
+        outputStrings.add(new String[]{""});
+        int secondsUsed = getSecondsUsed(timerStart);
+        outputStrings.add(new String[]{"Time Used (seconds)", String.valueOf(secondsUsed)});
+        outputStrings.add(new String[]{""});
+        int totalCars = calcTotalCars(countData);
+        outputStrings.add(new String[]{"Total number of cars", String.valueOf(totalCars)});
+        outputStrings.add(new String[]{""});
+        int hour = (secondsUsed / 60) / 60;
+        int minute = (secondsUsed / 60) % 60;
+        int second = secondsUsed % 60;
+        LocalTime timeUsed = LocalTime.of(hour, minute, second);
+        outputStrings.add(new String[]{"Time Used (hh:mm:ss)", timeUsed.toString()});
+        outputStrings.add(new String[]{""});
+        double countRealTimeHours = hour + (minute/60);
+        double carsPerHour = totalCars / countRealTimeHours;;
+        if(Double.isNaN(carsPerHour)) {
+            carsPerHour = 0;
+        }
+        outputStrings.add(new String[]{"Cars per hour", String.valueOf(carsPerHour)});
+        outputStrings.add(new String[]{""});
+        LocalTime firstIntervalStartTime = countData.get(0).getStartTime();
+        LocalTime lastIntervalStartTime = countData.get(countData.size() - 1).getStartTime();
+        outputStrings.add(new String[]{"First interval", firstIntervalStartTime.toString()});
+        outputStrings.add(new String[]{""});
+        outputStrings.add(new String[]{"Last interval", lastIntervalStartTime.toString()});
+        outputStrings.add(new String[]{""});
+        int[] counts = calcMovementTotals();
+        String[] countString = new String[17];
+        countString[0] = "Counts";
+        for(int i=0;i<countString.length-1;i++) { countString[i+1] = String.valueOf(counts[i]); }
+        outputStrings.add(countString);
+
+        return outputStrings;
+    }
+
+    private int getSecondsUsed(long timerStart) {
+        long currentTime = System.nanoTime();
+        long length = currentTime - timerStart;
+        return (int) (length / 1000000000);
+    }
+
+    private int calcTotalCars(ArrayList<Interval> countData) {
+        int total = 0;
+        for(Interval interval : countData) {
+            int[][] data = interval.getData();
+            for(int i = 0; i < 5; i++) {
+                for(int j = 0; j < 16; j++) {
+                    total += data[i][j];
+                }
+            }
+        }
+        return total;
+    }
+
+    private int[] calcMovementTotals() {
+        return new int[16];
     }
 
     public boolean saveFile(List<String[]> stringArray, Path path) throws Exception {
@@ -120,4 +188,7 @@ public class FileHandler {
         return list;
     }
 
+    public static String getDefaultDirectory() {
+        return DEFAULT_DIRECTORY;
+    }
 }

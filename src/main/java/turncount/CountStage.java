@@ -15,22 +15,24 @@ import javafx.scene.paint.RadialGradient;
 import javafx.scene.paint.Stop;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import lk.vivoxalabs.customstage.CustomStage;
+import lk.vivoxalabs.customstage.CustomStageBuilder;
+import lk.vivoxalabs.customstage.tools.HorizontalPos;
 
 import java.util.ArrayList;
 
 public class CountStage {
 
-    private Stage stage;
+    private CustomStage stage;
     private Scene scene;
     TabPane tabPane;
     ArrayList<ArrayList<Label>> countLabels = new ArrayList<>();
     Button nextIntervalButton = new Button("Next Interval");
     Button prevIntervalButton = new Button("Previous Interval");
     Button delIntervalButton = new Button("Delete Interval");
-    Button goToIntervalButton = new Button("Go to Interval");
+    Button goToIntervalButton = new Button("Save Data"); // ("Go to Interval");
 
-    public CountStage(Stage primaryStage) {
-        stage = primaryStage;
+    public CountStage() {
         createSceneAndSetupStage();
     }
 
@@ -53,20 +55,26 @@ public class CountStage {
         });
         //vBox.setBackground(new Background(new BackgroundFill(gradient1, CornerRadii.EMPTY, Insets.EMPTY)));
 
-        scene = new Scene(vBox, 500, 300);
-
-        stage.setTitle("TurnCountEnhanced");
-        stage.setScene(scene);
-        stage.setAlwaysOnTop(true);
-        stage.setResizable(false);
-        stage.show();
+        try {
+            CustomStage customStage = new CustomStageBuilder()
+                    .setWindowTitle("TurnCountEnhanced", HorizontalPos.RIGHT, HorizontalPos.CENTER)
+                    .setTitleColor("white")
+                    .setWindowColor("green").build();
+            customStage.setWidth(500);
+            customStage.setHeight(300);
+            customStage.changeScene(vBox);
+            stage = customStage;
+            stage.show();
+        } catch(Exception e) {
+            System.out.println(e);
+        }
 
         stage.focusedProperty().addListener((observable, oldValue, newValue) -> {
-            if(newValue == true) {
-                stage.setOpacity(1.0);
-            } else {
-                stage.setOpacity(0.3);
-            }
+//            if(newValue == true) {
+//                stage.setOpacity(1.0);
+//            } else {
+//                stage.setOpacity(0.3);
+//            }
         });
     }
 
@@ -153,6 +161,10 @@ public class CountStage {
         //controlsPane.setBackground(new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY)));
 
         return buttonBar;
+    }
+
+    public CustomStage getStage() {
+        return stage;
     }
 
     public Scene getScene() {

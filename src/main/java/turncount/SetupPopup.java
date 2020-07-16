@@ -8,6 +8,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.RadialGradient;
+import javafx.scene.paint.Stop;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -27,18 +30,24 @@ public class SetupPopup {
     private Button openFileButton = new Button("Open");
     private Button quitButton = new Button("Quit");
 
+    public SetupPopup(Stage stage) {
+        setupPopup(stage);
+    }
+
     public void setupPopup(Stage primaryStage) {
 
         launchScene = setupLaunchScene();
         newCountScene = setupNewCountScene();
+        launchScene.setFill(Color.TRANSPARENT);
 
         stage.setOnCloseRequest(windowEvent -> {
             System.exit(0);
         });
+
         stage.setScene(launchScene);
         stage.initModality(Modality.WINDOW_MODAL);
         stage.initOwner(primaryStage);
-        stage.initStyle(StageStyle.UNDECORATED);
+        stage.initStyle(StageStyle.TRANSPARENT);
         //stage.setX(0);
         //stage.setY(0);
         stage.show();
@@ -53,6 +62,7 @@ public class SetupPopup {
             System.exit(0);
         });
         GridPane gridPane = new GridPane();
+        gridPane.setBorder(new Border(new BorderStroke(Color.GREEN, BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(3))));
         gridPane.setAlignment(Pos.CENTER);
         gridPane.setHgap(10);
         gridPane.setVgap(20);
@@ -65,6 +75,12 @@ public class SetupPopup {
         gridPane.add(newButton,0, 1);
         gridPane.add(openFileButton,1, 1);
         gridPane.add(quitButton,2, 1);
+//        RadialGradient gradient1 = new RadialGradient(0, 0, 0.5, 0.5, 1, true, CycleMethod.NO_CYCLE, new Stop[] {
+//                new Stop(0, Color.web("#495867")),
+//                new Stop(0.5, Color.web("#495867")),
+//                new Stop(0.6, Color.TRANSPARENT)
+//        });
+//        gridPane.setBackground(new Background(new BackgroundFill(gradient1, CornerRadii.EMPTY, Insets.EMPTY)));
 
         //gridPane.setBackground(new Background(new BackgroundFill(Color.RED, CornerRadii.EMPTY, Insets.EMPTY)));
         //gridPane.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));

@@ -41,6 +41,7 @@ public class VideoStage {
         this.stage = new Stage();
         this.mediaView = new MediaView();
 
+        setupVideoStage();
     }
 
     // Creates video interface
@@ -50,7 +51,7 @@ public class VideoStage {
         vBox = new VBox(menuBar, mediaView);
         vBox.setOnMousePressed(mouseEvent -> pause());
         scene = new Scene(vBox, 100, 100);
-        File f = new File("C:\\Users\\Austin\\Downloads\\sample2.mp4"); // for testing
+        File f = new File("C:\\Users\\Austin\\Downloads\\small.mp4"); // for testing
         setupMedia(f);
         stage.setTitle("Playing Video");
         stage.setX(50);
