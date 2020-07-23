@@ -65,8 +65,8 @@ public class FileHandler {
         int secondsUsed = getSecondsUsed(timerStart);
         outputStrings.add(new String[]{"Time Used (seconds)", String.valueOf(secondsUsed)});
         outputStrings.add(new String[]{""});
-        int totalCars = calcTotalCars(countData);
-        outputStrings.add(new String[]{"Total number of cars", String.valueOf(totalCars)});
+        double totalCars = calcTotalCars(countData);
+        outputStrings.add(new String[]{"Total number of cars", String.valueOf((int) totalCars)});
         outputStrings.add(new String[]{""});
         int hour = (secondsUsed / 60) / 60;
         int minute = (secondsUsed / 60) % 60;
@@ -79,7 +79,7 @@ public class FileHandler {
         if(Double.isNaN(carsPerHour)) {
             carsPerHour = 0;
         }
-        outputStrings.add(new String[]{"Cars per hour", String.valueOf(carsPerHour)});
+        outputStrings.add(new String[]{"Cars per hour", String.valueOf((int) carsPerHour)});
         outputStrings.add(new String[]{""});
         LocalTime firstIntervalStartTime = countData.get(0).getStartTime();
         LocalTime lastIntervalStartTime = countData.get(countData.size() - 1).getStartTime();
@@ -102,8 +102,8 @@ public class FileHandler {
         return (int) (length / 1000000000);
     }
 
-    private int calcTotalCars(ArrayList<Interval> countData) {
-        int total = 0;
+    private double calcTotalCars(ArrayList<Interval> countData) {
+        double total = 0;
         for(Interval interval : countData) {
             int[][] data = interval.getData();
             for(int i = 0; i < 5; i++) {
@@ -120,10 +120,21 @@ public class FileHandler {
     }
 
     public boolean saveFile(List<String[]> stringArray, Path path) throws Exception {
+//        List<String[]> newList = new ArrayList<>();
+//        newList.add(new String[]{""});
+//        newList.add(new String[]{""});
+//        newList.add(new String[]{""});
+//        return writeAll(newList, path);
         return writeAll(stringArray, path);
     }
 
     public boolean writeAll(List<String[]> stringArray, Path path) throws Exception {
+        for(String[] list: stringArray) {
+            for(String s: list) {
+                System.out.print(s);
+            }
+            System.out.println();
+        }
         CSVWriter writer = new CSVWriter(new FileWriter(path.toString(), false),
                 CSVWriter.DEFAULT_SEPARATOR, CSVWriter.NO_QUOTE_CHARACTER,
                 CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
