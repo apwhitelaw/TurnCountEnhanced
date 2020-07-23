@@ -1,0 +1,109 @@
+/*
+.tab-pane {
+  -fx-tab-min-width:50px;
+  -fx-tab-max-width:50px;
+  -fx-tab-min-height:20px;
+  -fx-tab-max-height:20px;
+}
+.tab {
+  -fx-background-color: red, green, blue;
+}
+.tab-pane:top > .tab-header-area > .tab-header-background {
+    -fx-background-insets: 0, 1 0 0 0, 1;
+}
+-fx-focus-color: red;
+-fx-faint-focus-color: blue;
+*/
+
+.button {
+  -fx-shadow-highlight-color: rgb(223,236,230);
+  -fx-outer-border: rgb(60,162,162);
+  -fx-inner-border: black;
+  -fx-body-color: rgb(33,90,109);
+  -fx-focus-color: green;
+  -fx-text-fill: rgb(223,236,230);
+}
+
+.button-delete {
+  -fx-shadow-highlight-color: rgba(255,0,0,0.5);
+}
+
+/*  less bright hover effect
+.button:hover {
+  -fx-body-color: rgb(43,100,119);
+  -fx-outer-border: rgb(65,167,167);
+}
+
+    more bright hover effect
+.button:hover {
+  -fx-body-color: rgb(63,120,139);
+  -fx-outer-border: rgb(70,172,172);
+}
+*/
+
+.button:hover {
+  -fx-body-color: rgb(43,100,119);
+  -fx-outer-border: rgb(65,167,167);
+  -fx-text-fill: rgb(60,162,162);
+}
+
+.text-field {
+  -fx-background-color: transparent, rgb(33,90,109), rgb(146,199,163);
+  -fx-background-insets: 0,0,2;
+  -fx-background-radius: 2,10,10;
+  -fx-prompt-text-fill
+}
+
+
+.text-field:focused {
+    -fx-background-color: red, rgb(33,90,109), rgb(146,199,163);
+    -fx-background-insets: 0,0,2;
+    -fx-background-radius: 2,10,10;
+    -fx-prompt-text-fill: transparent;
+}
+
+
+.tab {
+  -fx-text-base-color: rgb(98,131,109);
+  -fx-background-color: linear-gradient(rgb(85,85,81) 0%, rgb(45,45,41) 50%);
+}
+
+.tab:selected .focus-indicator {
+    -fx-focus-color: rgb(60,162,162);
+    -fx-faint-focus-color: green;
+    -fx-border-insets: -4 -4 -7 -5, -2 -2 -6 -3;
+    -fx-border-width: 2, 1;
+}
+
+.tab:selected {
+  -fx-background-insets: 0, 1 2 1 1, 2 3 1 2;
+}
+
+.tab:selected .tab-label {
+  -fx-text-fill: rgb(146,199,163);
+}
+
+.tab-pane .tab-header-area .tab-header-background {
+  -fx-background-color: transparent, rgb(45,45,41), black;
+}
+
+.list-view {
+  -fx-background-color: black;
+}
+
+.list-view .scroll-bar:vertical {
+    -fx-scale-x: 0;
+    -fx-padding: -10;
+}
+
+.list-view .scroll-bar:horizontal {
+    -fx-scale-x: 0;
+    -fx-padding: -10;
+}
+
+.list-cell {
+  /* -fx-background-color: rgb(45,45,41); wrote in code, empty vs filled color */
+  -fx-text-fill: rgb(146,199,163);
+  -fx-cell-size: 27;
+  -fx-border-color: rgb(33,90,109);
+}
