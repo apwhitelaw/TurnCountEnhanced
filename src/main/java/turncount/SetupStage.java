@@ -22,7 +22,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-public class SetupPopupStage {
+public class SetupStage {
 
     private Stage       stage = new Stage();
     private Scene       launchScene;
@@ -38,7 +38,7 @@ public class SetupPopupStage {
     private Button      openFileButton;
     private Button      quitButton;
 
-    public SetupPopupStage(Stage stage) {
+    public SetupStage(Stage stage) {
         setupPopup(stage);
     }
 
