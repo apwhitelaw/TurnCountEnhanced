@@ -2,7 +2,12 @@ package turncount;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -10,17 +15,23 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
+import lk.vivoxalabs.customstage.CustomStage;
+import lk.vivoxalabs.customstage.CustomStageBuilder;
+import lk.vivoxalabs.customstage.tools.HorizontalPos;
 
 import java.io.File;
 import java.net.URI;
+import java.text.DecimalFormat;
 
 public class VideoStage {
 
@@ -29,13 +40,21 @@ public class VideoStage {
     final static int DEFAULT_SEEK_TIME = 3;
 
     private final Stage stage;
+    CustomStage customStage;
     private Scene scene;
     private MediaPlayer mediaPlayer;
     private MediaView mediaView;
     private VBox vBox;
+    BorderPane bp;
+    StackPane stackPane;
     private MenuBar menuBar;
+    Label titleLabel;
+    Label timeText;
+    Label rateText;
 
     private Double lastChange = 0.0;
+    double initX = 0;
+    double initY = 0;
 
     public VideoStage() {
         this.stage = new Stage();
@@ -48,34 +67,38 @@ public class VideoStage {
     public void setupVideoStage() {
         MediaView mediaView = new MediaView();
         menuBar = setupMenuBar();
-        vBox = new VBox(menuBar, mediaView);
-        vBox.setOnMousePressed(mouseEvent -> pause());
-        scene = new Scene(vBox, 100, 100);
-        File f = new File("C:\\Users\\Austin\\Downloads\\small.mp4"); // for testing
+
+//        vBox = new VBox(menuBar, mediaView);
+//        VBox.setVgrow(mediaView, Priority.ALWAYS);
+//        vBox.setOnMousePressed(mouseEvent -> pause());
+        timeText = new Label("Hello World!");
+        stackPane = new StackPane(mediaView, timeText);
+        bp = new BorderPane(stackPane);
+        bp.setTop(menuBar);
+        //scene = new Scene(bp, 100, 100);
+        File f = new File("C:\\Users\\Austin\\Downloads\\trafficam.mp4"); // for testing
         setupMedia(f);
-        stage.setTitle("Playing Video");
-        stage.setX(50);
-        stage.setY(50);
-        stage.show();
+//        stage.setTitle("Playing Video");
+//        stage.setX(50);
+//        stage.setY(50);
+//        //stage.initStyle(StageStyle.UNDECORATED);
+//        stage.show();
+//        setupKeyHandler();
+
+        // spacebar action does not work with CustomStage
+        try {
+            customStage = new CustomStageBuilder()
+                    .setWindowTitle("Playing Video...", HorizontalPos.RIGHT, HorizontalPos.LEFT)
+                    .setTitleColor("rgb(146,199,163)")
+                    .setWindowColor("rgb(33,90,109)")
+                    .setDimensions(300,355,1920,1080).build();;
+            //customStage.initStyle(Stage);
+        } catch(Exception e) {
+            System.out.println(e);
+        }
+        customStage.changeScene(bp);
+        customStage.show();
         setupKeyHandler();
-
-
-//        videoStage.widthProperty().addListener((obs, oldVal, newVal) -> {
-//            if(newVal.doubleValue() > mediaView.getFitWidth()) {
-//                videoStage.setWidth(oldVal.doubleValue());
-//            }
-//        });
-//        videoStage.heightProperty().addListener((obs, oldVal, newVal) -> {
-//            if(newVal.doubleValue() > mediaView.getFitHeight()) {
-//                videoStage.setHeight(oldVal.doubleValue());
-//            }
-//        });
-
-        DoubleProperty mediaViewWidth = mediaView.fitWidthProperty();
-        DoubleProperty mediaViewHeight = mediaView.fitHeightProperty();
-        mediaViewWidth.bind(Bindings.selectDouble(mediaView.sceneProperty(), "width"));
-        mediaViewHeight.bind(Bindings.selectDouble(mediaView.sceneProperty(), "height"));
-        mediaView.setPreserveRatio(true);
     }
 
     public void setupElapsedTimeListener(boolean countStarted) {
@@ -103,13 +126,59 @@ public class VideoStage {
         Media media = loadMedia(file);
         mediaPlayer = new MediaPlayer(media);
         mediaView.setMediaPlayer(mediaPlayer);
-        vBox = new VBox(menuBar, mediaView);
-        vBox.setOnMousePressed(mouseEvent -> pause());
+        timeText = new Label("Time");
+        timeText.setFont(new Font(20));
+        timeText.setBackground(Helper.createBackground(Color.RED));
+        rateText = new Label("Rate");
+        rateText.setFont(new Font(20));
+        rateText.setBackground(Helper.createBackground(Color.RED));
+        VBox videoInfo = new VBox(timeText, rateText);
+        stackPane = new StackPane(mediaView, videoInfo);
+        stackPane.setOnMouseClicked(mouseEvent -> pause());
+        bp = new BorderPane(stackPane);
+        bp.setTop(menuBar);
+//        mediaView.fitWidthProperty().bind(bp.widthProperty());
+//        mediaView.fitHeightProperty().bind(bp.heightProperty());
+
         //mediaPlayer.setAutoPlay(true);
         mediaPlayer.setOnReady(() -> {
-            Scene newScene = new Scene(vBox, media.getWidth(), media.getHeight() + menuBar.getHeight());
-            newScene.setFill(Color.DARKSLATEGRAY);
-            stage.setScene(newScene);
+//            Scene newScene = new Scene(bp, media.getWidth(), media.getHeight());
+//            newScene.setFill(Color.DARKSLATEGRAY);
+//            stage.setScene(newScene);
+//            stage.widthProperty().addListener((observableValue, number, t1) -> mediaView.setFitWidth(t1.doubleValue()));
+//            stage.heightProperty().addListener((observableValue, number, t1) -> mediaView.setFitHeight(t1.doubleValue()));
+
+            customStage.changeScene(bp);
+            customStage.setWidth(media.getWidth());
+            customStage.setHeight(media.getHeight() + 30 + 25); // stage window (30) menubar (25)
+//            mediaView.fitWidthProperty().bind(customStage.widthProperty());
+//            mediaView.fitHeightProperty().bind(customStage.heightProperty());
+            customStage.widthProperty().addListener((observableValue, number, t1) -> mediaView.setFitWidth(t1.doubleValue()));
+            customStage.heightProperty().addListener((observableValue, number, t1) -> mediaView.setFitHeight(t1.doubleValue() + 55));
+            mediaPlayer.currentTimeProperty().addListener((observableValue, oldVal, newVal) -> {
+                double milli = newVal.toMillis();
+                double hours = Math.floor(milli / 3600000);
+                double minutes = Math.floor((milli % 3600000) / 60000);
+                double seconds = ((milli % 3600000) % 60000) / 1000;
+                DecimalFormat df = new DecimalFormat("00.##");
+                String secondsString = df.format(seconds);
+                timeText.setText(String.valueOf(String.format("%02.0f:%02.0f:%s", hours, minutes, secondsString)));
+            });
+
+            mediaPlayer.rateProperty().addListener((observableValue, oldVal, newVal) -> {
+                if(newVal.doubleValue() <= 8.0) {
+                    rateText.setText(String.valueOf(newVal.doubleValue()));
+                }
+            });
+
+            menuBar.setOnMousePressed(mouseEvent -> {
+                initX = mouseEvent.getSceneX();
+                initY = mouseEvent.getSceneY();
+            });
+            menuBar.setOnMouseDragged(mouseEvent -> {
+                stage.setX(mouseEvent.getScreenX() - initX);
+                stage.setY(mouseEvent.getScreenY() - initY);
+            });
         });
     }
 
@@ -134,7 +203,15 @@ public class VideoStage {
 
     // Keyboard media controls
     public void setupKeyHandler() {
-        stage.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
+        // Consume spacebar press to eliminate issue with CustomStage
+        customStage.addEventFilter(KeyEvent.KEY_PRESSED, k -> {
+            if (k.getCode() == KeyCode.SPACE){
+                k.consume();
+                pause();
+            }
+        });
+
+        customStage.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
             switch(keyEvent.getCode()) {
                 case LEFT: seek(-DEFAULT_SEEK_TIME); break;
                 case RIGHT: seek(DEFAULT_SEEK_TIME); break;
@@ -149,11 +226,16 @@ public class VideoStage {
     public void seek(int seconds) {
         if(mediaPlayer.getStatus() == MediaPlayer.Status.PAUSED) {
             mediaPlayer.play();
+            double time = mediaPlayer.getCurrentTime().toMillis();
+            Duration dur = new Duration(time + (seconds * 1000));
+            mediaPlayer.seek(dur);
+            mediaPlayer.pause();
         }
-        double time = mediaPlayer.getCurrentTime().toMillis();
-        Duration dur = new Duration(time + (seconds * 1000));
-        mediaPlayer.seek(dur);
-        mediaPlayer.pause();
+        if(mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING) {
+            double time = mediaPlayer.getCurrentTime().toMillis();
+            Duration dur = new Duration(time + (seconds * 1000));
+            mediaPlayer.seek(dur);
+        }
     }
 
     // Toggles pause
