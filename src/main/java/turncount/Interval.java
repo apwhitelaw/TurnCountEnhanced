@@ -1,13 +1,16 @@
 package turncount;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 
 public class Interval {
 
-    LocalTime startTime;
-    LocalTime endTime;
-    private int[][] data;
+    LocalTime               startTime;
+    LocalTime               endTime;
+    private int[][]         data;
+    ObservableList<String>  buttonFeed;
 
     public enum Movement {
         SBR(0, "SB Right"),
@@ -48,6 +51,7 @@ public class Interval {
     public Interval(LocalTime time, int[][] data) {
         this(time);
         this.data = data;
+        this.buttonFeed = FXCollections.observableArrayList("","","","","","","","");
     }
 
     public Interval(int hour, int minute) {
@@ -58,10 +62,19 @@ public class Interval {
         startTime = time;
         data = new int[5][16];
         endTime = startTime.plusMinutes(5);
+        this.buttonFeed = FXCollections.observableArrayList("","","","","","","","");
     }
 
     public void increment(int bank, int index) {
         data[bank][index] += 1;;
+    }
+
+    public ObservableList<String> getButtonFeed() {
+        return buttonFeed;
+    }
+
+    public void setButtonFeed(ObservableList<String> buttonFeed) {
+        this.buttonFeed = buttonFeed;
     }
 
     public LocalTime getStartTime() {
